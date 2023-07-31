@@ -10,7 +10,7 @@ executors:
     environment:
       BUF_VER: 0.40.0
       PROTOC_VER: 3.15.6
-    working_directory: /go/src/github.com/improbable-eng/grpc-web
+    working_directory: /go/src/github.com/traefik/grpc-web
 
 jobs:
   # This first job in the workflow optimises test time by combining the following:
@@ -53,7 +53,7 @@ jobs:
           command: npm run build:integration
       # Persisting the workspace allows the built assets to be used across the fan-out tests in the subsequent step
       - persist_to_workspace:
-          root: /go/src/github.com/improbable-eng/grpc-web
+          root: /go/src/github.com/traefik/grpc-web
           paths:
             - integration_test
             - client
@@ -66,7 +66,7 @@ jobs:
       - checkout
       # Attaches the workspace from the previous step to retrieve the built assets for the tests
       - attach_workspace:
-          at: /go/src/github.com/improbable-eng/grpc-web
+          at: /go/src/github.com/traefik/grpc-web
       - run: sudo apt-get install moreutils
       # The two following hosts must match those in integration_test/hosts-config.ts
       - run: echo 127.0.0.1 testhost | sudo tee -a /etc/hosts

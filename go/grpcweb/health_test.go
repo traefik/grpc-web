@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/improbable-eng/grpc-web/go/grpcweb"
-	testproto "github.com/improbable-eng/grpc-web/integration_test/go/_proto/improbable/grpcweb/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/traefik/grpc-web/go/grpcweb"
+	testproto "github.com/traefik/grpc-web/integration_test/go/_proto/improbable/grpcweb/test"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"

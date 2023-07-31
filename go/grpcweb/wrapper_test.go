@@ -1,4 +1,4 @@
-//Copyright 2017 Improbable. All Rights Reserved.
+// Copyright 2017 Improbable. All Rights Reserved.
 // See LICENSE for licensing terms.
 
 package grpcweb_test
@@ -25,12 +25,12 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	google_protobuf "github.com/golang/protobuf/ptypes/empty"
-	"github.com/improbable-eng/grpc-web/go/grpcweb"
-	testproto "github.com/improbable-eng/grpc-web/integration_test/go/_proto/improbable/grpcweb/test"
 	"github.com/mwitkow/go-conntrack/connhelpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"github.com/traefik/grpc-web/go/grpcweb"
+	testproto "github.com/traefik/grpc-web/integration_test/go/_proto/improbable/grpcweb/test"
 	"golang.org/x/net/context"
 	"golang.org/x/net/http2"
 	"google.golang.org/grpc"

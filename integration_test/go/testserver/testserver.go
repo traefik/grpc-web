@@ -11,8 +11,8 @@ import (
 	"sync"
 
 	google_protobuf "github.com/golang/protobuf/ptypes/empty"
-	"github.com/improbable-eng/grpc-web/go/grpcweb"
-	testproto "github.com/improbable-eng/grpc-web/integration_test/go/_proto/improbable/grpcweb/test"
+	"github.com/traefik/grpc-web/go/grpcweb"
+	testproto "github.com/traefik/grpc-web/integration_test/go/_proto/improbable/grpcweb/test"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
