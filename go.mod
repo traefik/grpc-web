@@ -37,3 +37,6 @@ require (
 	google.golang.org/genproto v0.0.0-20210126160654-44e461bb6506 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+// Replace to handle https://coder.com/blog/websocket
+replace nhooyr.io/websocket => github.com/coder/websocket v1.8.7
