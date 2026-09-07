@@ -98,6 +98,10 @@ func (w *grpcWebResponse) copyTrailersToPayload() {
 	trailers := extractTrailingHeaders(w.headers, w.wrapped.Header())
 	trailerBuffer := new(bytes.Buffer)
 	trailers.Write(trailerBuffer)
+	if trailerBuffer.Len() == 0 {
+		flushWriter(w.wrapped)
+		return
+	}
 	trailerGrpcDataHeader := []byte{1 << 7, 0, 0, 0, 0} // MSB=1 indicates this is a trailer data frame.
 	binary.BigEndian.PutUint32(trailerGrpcDataHeader[1:5], uint32(trailerBuffer.Len()))
 	w.wrapped.Write(trailerGrpcDataHeader)
