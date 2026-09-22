@@ -11,8 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"nhooyr.io/websocket"
-
+	"github.com/coder/websocket"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"

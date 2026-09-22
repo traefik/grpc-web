@@ -1,9 +1,10 @@
 module github.com/traefik/grpc-web
 
-go 1.19
+go 1.23
 
 require (
 	github.com/cenkalti/backoff/v4 v4.2.1
+	github.com/coder/websocket v1.8.15
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f
 	github.com/golang/protobuf v1.5.3
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.2
@@ -18,7 +19,6 @@ require (
 	golang.org/x/net v0.12.0
 	google.golang.org/grpc v1.32.0
 	google.golang.org/protobuf v1.27.1
-	nhooyr.io/websocket v1.8.7
 )
 
 require (
@@ -37,6 +37,3 @@ require (
 	google.golang.org/genproto v0.0.0-20210126160654-44e461bb6506 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-// Replace to handle https://coder.com/blog/websocket
-replace nhooyr.io/websocket => github.com/coder/websocket v1.8.7
