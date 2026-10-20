@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"golang.org/x/net/http2"
-	"google.golang.org/grpc/grpclog"
 )
 
 // grpcWebResponse implements http.ResponseWriter.
@@ -59,11 +58,17 @@ func (w *grpcWebResponse) WriteHeader(code int) {
 }
 
 func (w *grpcWebResponse) Flush() {
-	if w.wroteHeaders || w.wroteBody {
+	_ = w.FlushError()
+}
+
+// FlushError flushes the wrapped writer and returns its error, for http.ResponseController.
+func (w *grpcWebResponse) FlushError() error {
+	if !w.wroteHeaders && !w.wroteBody {
 		// Work around the fact that WriteHeader and a call to Flush would have caused a 200 response.
 		// This is the case when there is no payload.
-		flushWriter(w.wrapped)
+		return nil
 	}
+	return http.NewResponseController(w.wrapped).Flush()
 }
 
 // Unwrap returns the wrapped http.ResponseWriter, for http.ResponseController.
@@ -95,7 +100,7 @@ func (w *grpcWebResponse) finishRequest(req *http.Request) {
 		w.copyTrailersToPayload()
 	} else {
 		w.WriteHeader(http.StatusOK)
-		flushWriter(w.wrapped)
+		_ = http.NewResponseController(w.wrapped).Flush()
 	}
 }
 
@@ -107,7 +112,7 @@ func (w *grpcWebResponse) copyTrailersToPayload() {
 	binary.BigEndian.PutUint32(trailerGrpcDataHeader[1:5], uint32(trailerBuffer.Len()))
 	w.wrapped.Write(trailerGrpcDataHeader)
 	w.wrapped.Write(trailerBuffer.Bytes())
-	flushWriter(w.wrapped)
+	_ = http.NewResponseController(w.wrapped).Flush()
 }
 
 func extractTrailingHeaders(src http.Header, flushed http.Header) http.Header {
@@ -154,27 +159,22 @@ func (w *base64ResponseWriter) WriteHeader(code int) {
 }
 
 func (w *base64ResponseWriter) Flush() {
+	_ = w.FlushError()
+}
+
+// FlushError flushes the base64 encoder and the wrapped writer, and returns their error, for http.ResponseController.
+func (w *base64ResponseWriter) FlushError() error {
 	// Flush the base64 encoder by closing it. Grpc-web permits multiple padded base64 parts:
 	// https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md
 	err := w.encoder.Close()
-	if err != nil {
-		// Must ignore this error since Flush() is not defined as returning an error
-		grpclog.Errorf("ignoring error Flushing base64 encoder: %v", err)
-	}
 	w.newEncoder()
-	flushWriter(w.wrapped)
+	if err != nil {
+		return err
+	}
+	return http.NewResponseController(w.wrapped).Flush()
 }
 
 // Unwrap returns the wrapped http.ResponseWriter, for http.ResponseController.
 func (w *base64ResponseWriter) Unwrap() http.ResponseWriter {
 	return w.wrapped
-}
-
-func flushWriter(w http.ResponseWriter) {
-	f, ok := w.(http.Flusher)
-	if !ok {
-		return
-	}
-
-	f.Flush()
 }

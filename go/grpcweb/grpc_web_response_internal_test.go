@@ -66,3 +66,34 @@ func TestResponseWriterUnwrap(t *testing.T) {
 		})
 	}
 }
+
+// noFlushWriter only exposes the http.ResponseWriter methods: no Flush, no Unwrap.
+type noFlushWriter struct {
+	http.ResponseWriter
+}
+
+func TestResponseWriterFlushError(t *testing.T) {
+	cases := []struct {
+		desc      string
+		newWriter func(http.ResponseWriter) http.ResponseWriter
+	}{
+		{
+			desc:      "grpcWebResponse",
+			newWriter: func(w http.ResponseWriter) http.ResponseWriter { return newGrpcWebResponse(w, false) },
+		},
+		{
+			desc:      "base64ResponseWriter",
+			newWriter: newBase64ResponseWriter,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.desc, func(t *testing.T) {
+			w := c.newWriter(noFlushWriter{ResponseWriter: httptest.NewRecorder()})
+			_, err := w.Write([]byte("a"))
+			require.NoError(t, err)
+
+			assert.ErrorIs(t, http.NewResponseController(w).Flush(), http.ErrNotSupported)
+		})
+	}
+}
