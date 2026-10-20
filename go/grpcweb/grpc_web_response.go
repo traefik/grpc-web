@@ -66,6 +66,11 @@ func (w *grpcWebResponse) Flush() {
 	}
 }
 
+// Unwrap returns the wrapped http.ResponseWriter, for http.ResponseController.
+func (w *grpcWebResponse) Unwrap() http.ResponseWriter {
+	return w.wrapped
+}
+
 // prepareHeaders runs all required header copying and transformations to
 // prepare the header of the wrapped response writer.
 func (w *grpcWebResponse) prepareHeaders() {
@@ -158,6 +163,11 @@ func (w *base64ResponseWriter) Flush() {
 	}
 	w.newEncoder()
 	flushWriter(w.wrapped)
+}
+
+// Unwrap returns the wrapped http.ResponseWriter, for http.ResponseController.
+func (w *base64ResponseWriter) Unwrap() http.ResponseWriter {
+	return w.wrapped
 }
 
 func flushWriter(w http.ResponseWriter) {
