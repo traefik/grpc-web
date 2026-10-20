@@ -59,7 +59,10 @@ func (w *grpcWebResponse) WriteHeader(code int) {
 }
 
 func (w *grpcWebResponse) Flush() {
-	_ = w.FlushError()
+	if err := w.FlushError(); err != nil {
+		// Must ignore this error since Flush() is not defined as returning an error
+		grpclog.Errorf("ignoring error Flushing grpc-web response writer: %v", err)
+	}
 }
 
 // FlushError flushes the wrapped writer and returns its error, for http.ResponseController.
