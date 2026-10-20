@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"golang.org/x/net/http2"
+	"google.golang.org/grpc/grpclog"
 )
 
 // grpcWebResponse implements http.ResponseWriter.
@@ -159,7 +160,10 @@ func (w *base64ResponseWriter) WriteHeader(code int) {
 }
 
 func (w *base64ResponseWriter) Flush() {
-	_ = w.FlushError()
+	if err := w.FlushError(); err != nil {
+		// Must ignore this error since Flush() is not defined as returning an error
+		grpclog.Errorf("ignoring error Flushing base64 response writer: %v", err)
+	}
 }
 
 // FlushError flushes the base64 encoder and the wrapped writer, and returns their error, for http.ResponseController.
