@@ -112,10 +112,16 @@ func (w *grpcWebResponse) copyTrailersToPayload() {
 	trailers := extractTrailingHeaders(w.headers, w.wrapped.Header())
 	trailerBuffer := new(bytes.Buffer)
 	trailers.Write(trailerBuffer)
-	trailerGrpcDataHeader := []byte{1 << 7, 0, 0, 0, 0} // MSB=1 indicates this is a trailer data frame.
-	binary.BigEndian.PutUint32(trailerGrpcDataHeader[1:5], uint32(trailerBuffer.Len()))
-	w.wrapped.Write(trailerGrpcDataHeader)
-	w.wrapped.Write(trailerBuffer.Bytes())
+	// Skip the trailer frame entirely when there are no trailers to send.
+	// Emitting a zero-length trailer frame is legal but meaningless, and
+	// other gRPC-Web proxies (Envoy, improbable-eng) send a headers-only
+	// response in that case (e.g. trailers-only gRPC responses).
+	if trailerBuffer.Len() > 0 {
+		trailerGrpcDataHeader := []byte{1 << 7, 0, 0, 0, 0} // MSB=1 indicates this is a trailer data frame.
+		binary.BigEndian.PutUint32(trailerGrpcDataHeader[1:5], uint32(trailerBuffer.Len()))
+		_, _ = w.wrapped.Write(trailerGrpcDataHeader)
+		_, _ = w.wrapped.Write(trailerBuffer.Bytes())
+	}
 	_ = http.NewResponseController(w.wrapped).Flush()
 }
 

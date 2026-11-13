@@ -97,3 +97,35 @@ func TestResponseWriterFlushError(t *testing.T) {
 		})
 	}
 }
+
+// A trailers-only gRPC response (all trailers already flushed as response
+// headers) must produce a headers-only gRPC-Web response, with no body at all.
+// See https://github.com/traefik/traefik/issues/13842.
+func TestFinishRequestNoTrailersWritesNoFrame(t *testing.T) {
+	rec := httptest.NewRecorder()
+	w := newGrpcWebResponse(rec, false)
+	w.Header().Set("Grpc-Status", "0")
+	w.WriteHeader(http.StatusOK)
+
+	w.finishRequest(nil)
+
+	assert.Equal(t, 0, rec.Body.Len(), "empty trailer frame must not be written")
+}
+
+// Trailers that remain to be sent are still emitted as a trailer frame.
+func TestFinishRequestWritesTrailerFrame(t *testing.T) {
+	rec := httptest.NewRecorder()
+	w := newGrpcWebResponse(rec, false)
+	w.Header().Set("Grpc-Status", "0")
+	w.WriteHeader(http.StatusOK)
+	// A trailer set after WriteHeader has not been flushed to the response
+	// headers, so it must be written as a trailer frame.
+	w.Header().Set("X-Custom-Trailer", "v1")
+
+	w.finishRequest(nil)
+
+	body := rec.Body.Bytes()
+	require.Greater(t, len(body), 5)
+	assert.Equal(t, byte(1<<7), body[0], "trailer data frame must have MSB set")
+	assert.Contains(t, string(body[5:]), "x-custom-trailer: v1")
+}
